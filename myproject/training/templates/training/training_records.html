@@ -1,0 +1,89 @@
+<!-- training/templates/training/training_records.html -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>训练记录</title>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <h1>训练记录</h1>
+    <table id="trainingRecordsTable" border="1">
+        <thead>
+            <tr>
+                <th>训练ID</th>
+                <th>相机IP</th>
+                <th>模型类型</th>
+                <th>图片数量</th>
+                <th>训练开始时间</th>
+                <th>训练结束时间</th>
+                <th>模型路径</th>
+                <th>是否成功</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 训练记录数据将被插入这里 -->
+        </tbody>
+    </table>
+
+    <script>
+        function loadTrainingRecords() {
+            fetch('/api/training_records/')
+                .then(response => response.json())
+                .then(data => {
+                    var records = data;
+                    var tableBody = document.querySelector('#trainingRecordsTable tbody');
+                    tableBody.innerHTML = '';
+
+                    records.forEach(function (record) {
+                        var row = document.createElement('tr');
+
+                        var trainingIdCell = document.createElement('td');
+                        trainingIdCell.textContent = record.id;
+                        row.appendChild(trainingIdCell);
+
+                        var cameraIpCell = document.createElement('td');
+                        cameraIpCell.textContent = record.camera_ip || '手动训练';
+                        row.appendChild(cameraIpCell);
+
+                        var modelTypeCell = document.createElement('td');
+                        modelTypeCell.textContent = record.model_type;
+                        row.appendChild(modelTypeCell);
+
+                        var imageCountCell = document.createElement('td');
+                        imageCountCell.textContent = record.image_count;
+                        row.appendChild(imageCountCell);
+
+                        var startTimeCell = document.createElement('td');
+                        startTimeCell.textContent = record.training_start_time;
+                        row.appendChild(startTimeCell);
+
+                        var endTimeCell = document.createElement('td');
+                        endTimeCell.textContent = record.training_end_time || '进行中';
+                        row.appendChild(endTimeCell);
+
+                        var modelPathCell = document.createElement('td');
+                        modelPathCell.textContent = record.model_path || 'N/A';
+                        row.appendChild(modelPathCell);
+
+                        var isSuccessCell = document.createElement('td');
+                        isSuccessCell.textContent = record.is_successful ? '成功' : '失败';
+                        row.appendChild(isSuccessCell);
+
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
+
+        // 页面加载后加载训练记录
+        window.onload = function () {
+            loadTrainingRecords();
+            // 可以设置定时刷新
+            setInterval(loadTrainingRecords, 60000);  // 每 60 秒刷新一次
+        };
+    </script>
+</body>
+
+</html>
