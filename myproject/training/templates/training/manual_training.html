@@ -1,0 +1,83 @@
+<!-- training/templates/training/manual_training.html -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>手动模型训练</title>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <h1>手动模型训练</h1>
+    <form id="manualTrainingForm">
+        <label for="modelType">选择模型类型：</label>
+        <select id="modelType" name="modelType">
+            <option value="ResNet50">ResNet50</option>
+            <option value="MobileNet">MobileNet</option>
+            <!-- 添加更多模型类型 -->
+        </select>
+        <br><br>
+        <label for="datasetPath">数据集路径：</label>
+        <input type="text" id="datasetPath" name="datasetPath" placeholder="/path/to/dataset">
+        <br><br>
+        <button type="button" onclick="startTraining()">开始训练</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script>
+        function startTraining() {
+            var modelType = document.getElementById('modelType').value;
+            var datasetPath = document.getElementById('datasetPath').value;
+
+            var requestData = {
+                model_type: modelType,
+                dataset_path: datasetPath
+            };
+
+            fetch('/api/manual_train/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')  // 获取 CSRF 令牌
+                },
+                body: JSON.stringify(requestData)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 400) {
+                        return response.json().then(data => Promise.reject(data));
+                    } else {
+                        return Promise.reject({ message: '请求失败' });
+                    }
+                })
+                .then(data => {
+                    document.getElementById('message').innerText = data.message;
+                })
+                .catch(error => {
+                    document.getElementById('message').innerText = error.message || '发生错误';
+                });
+        }
+
+        // 获取 CSRF 令牌的函数
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+
+</html>
